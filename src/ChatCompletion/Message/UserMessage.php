@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace App\Openai\ChatCompletion\Message;
+namespace Shanginn\Openai\ChatCompletion\Message;
 
-use App\Openai\ChatCompletion\CompletionRequest\Role;
-use App\Openai\ChatCompletion\Message\User\ContentPartInterface;
+use Shanginn\Openai\ChatCompletion\CompletionRequest\Role;
+use Shanginn\Openai\ChatCompletion\Message\User\ContentPartInterface;
 
 class UserMessage implements MessageInterface
 {

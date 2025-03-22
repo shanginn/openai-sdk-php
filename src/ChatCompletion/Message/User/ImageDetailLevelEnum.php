@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Openai\ChatCompletion\Message\User;
+namespace Shanginn\Openai\ChatCompletion\Message\User;
 
 /**
  * Low or high fidelity image understanding

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Openai\ChatCompletion\Message\User;
+namespace Shanginn\Openai\ChatCompletion\Message\User;
 
 final readonly class TextContentPart implements ContentPartInterface
 {

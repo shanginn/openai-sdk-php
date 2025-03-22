@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Openai\Util;
+namespace Shanginn\Openai\Util;
 
 use Attribute;
 use BackedEnum;

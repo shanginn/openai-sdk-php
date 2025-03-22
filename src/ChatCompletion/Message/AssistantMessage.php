@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace App\Openai\ChatCompletion\Message;
+namespace Shanginn\Openai\ChatCompletion\Message;
 
-use App\Openai\ChatCompletion\CompletionRequest\Role;
-use App\Openai\ChatCompletion\Message\Assistant\ToolCallInterface;
+use Shanginn\Openai\ChatCompletion\CompletionRequest\Role;
+use Shanginn\Openai\ChatCompletion\Message\Assistant\ToolCallInterface;
 use Crell\Serde\Attributes as Serde;
 use Crell\Serde\Renaming\Cases;
 use InvalidArgumentException;

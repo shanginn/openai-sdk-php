@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Openai\ChatCompletion\CompletionRequest;
+namespace Shanginn\Openai\ChatCompletion\CompletionRequest;
 
 use ArrayObject;
 use Symfony\Component\Serializer\Normalizer\NormalizerAwareInterface;

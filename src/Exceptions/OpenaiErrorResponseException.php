@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\Openai\Exceptions;
+namespace Shanginn\Openai\Exceptions;
 
-use App\Openai\ChatCompletion\ErrorResponse;
+use Shanginn\Openai\ChatCompletion\ErrorResponse;
 
 class OpenaiErrorResponseException extends OpenaiException
 {

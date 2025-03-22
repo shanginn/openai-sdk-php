@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Openai\ChatCompletion\CompletionRequest;
+namespace Shanginn\Openai\ChatCompletion\CompletionRequest;
 
 enum ResponseFormatEnum: string
 {

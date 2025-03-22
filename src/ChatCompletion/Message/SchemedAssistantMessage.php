@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\Openai\ChatCompletion\Message;
+namespace Shanginn\Openai\ChatCompletion\Message;
 
-use App\Openai\ChatCompletion\CompletionRequest\JsonSchema\JsonSchemaInterface;
+use Shanginn\Openai\ChatCompletion\CompletionRequest\JsonSchema\JsonSchemaInterface;
 
 class SchemedAssistantMessage extends AssistantMessage
 {

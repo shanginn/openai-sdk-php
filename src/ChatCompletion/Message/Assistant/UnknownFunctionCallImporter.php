@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Openai\ChatCompletion\Message\Assistant;
+namespace Shanginn\Openai\ChatCompletion\Message\Assistant;
 
 use Crell\Serde\Attributes\Field;
 use Crell\Serde\Deserializer;

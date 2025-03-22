@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Openai\ChatCompletion\CompletionRequest\JsonSchema;
+namespace Shanginn\Openai\ChatCompletion\CompletionRequest\JsonSchema;
 
 use Attribute;
 

@@ -2,23 +2,23 @@
 
 declare(strict_types=1);
 
-namespace App\Openai;
+namespace Shanginn\Openai;
 
-use App\Openai\ChatCompletion\CompletionRequest;
-use App\Openai\ChatCompletion\CompletionRequest\ResponseFormat;
-use App\Openai\ChatCompletion\CompletionRequest\ResponseFormatEnum;
-use App\Openai\ChatCompletion\CompletionRequest\ToolChoice;
-use App\Openai\ChatCompletion\CompletionRequest\ToolInterface;
-use App\Openai\ChatCompletion\CompletionResponse;
-use App\Openai\ChatCompletion\ErrorResponse;
-use App\Openai\ChatCompletion\Message\Assistant\KnownFunctionCall;
-use App\Openai\ChatCompletion\Message\Assistant\UnknownFunctionCall;
-use App\Openai\ChatCompletion\Message\AssistantMessage;
-use App\Openai\ChatCompletion\Message\MessageInterface;
-use App\Openai\ChatCompletion\Message\SystemMessage;
-use App\Openai\Openai\OpenaiClientInterface;
-use App\Openai\Openai\OpenaiSerializer;
-use App\Openai\Openai\OpenaiSerializerInterface;
+use Shanginn\Openai\ChatCompletion\CompletionRequest;
+use Shanginn\Openai\ChatCompletion\CompletionRequest\ResponseFormat;
+use Shanginn\Openai\ChatCompletion\CompletionRequest\ResponseFormatEnum;
+use Shanginn\Openai\ChatCompletion\CompletionRequest\ToolChoice;
+use Shanginn\Openai\ChatCompletion\CompletionRequest\ToolInterface;
+use Shanginn\Openai\ChatCompletion\CompletionResponse;
+use Shanginn\Openai\ChatCompletion\ErrorResponse;
+use Shanginn\Openai\ChatCompletion\Message\Assistant\KnownFunctionCall;
+use Shanginn\Openai\ChatCompletion\Message\Assistant\UnknownFunctionCall;
+use Shanginn\Openai\ChatCompletion\Message\AssistantMessage;
+use Shanginn\Openai\ChatCompletion\Message\MessageInterface;
+use Shanginn\Openai\ChatCompletion\Message\SystemMessage;
+use Shanginn\Openai\Openai\OpenaiClientInterface;
+use Shanginn\Openai\Openai\OpenaiSerializer;
+use Shanginn\Openai\Openai\OpenaiSerializerInterface;
 use Throwable;
 
 final readonly class Openai

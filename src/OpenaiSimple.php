@@ -2,23 +2,23 @@
 
 declare(strict_types=1);
 
-namespace App\Openai;
+namespace Shanginn\Openai;
 
-use App\Openai\ChatCompletion\CompletionRequest\JsonSchema\JsonSchemaInterface;
-use App\Openai\ChatCompletion\CompletionRequest\ResponseFormat;
-use App\Openai\ChatCompletion\CompletionRequest\ResponseFormatEnum;
-use App\Openai\ChatCompletion\CompletionRequest\ToolChoice;
-use App\Openai\ChatCompletion\CompletionRequest\ToolInterface;
-use App\Openai\ChatCompletion\ErrorResponse;
-use App\Openai\ChatCompletion\Message\Assistant\KnownFunctionCall;
-use App\Openai\ChatCompletion\Message\MessageInterface;
-use App\Openai\ChatCompletion\Message\SchemedAssistantMessage;
-use App\Openai\ChatCompletion\Message\UserMessage;
-use App\Openai\Exceptions\OpenaiErrorResponseException;
-use App\Openai\Exceptions\OpenaiNoChoicesException;
-use App\Openai\Exceptions\OpenaiNoContentException;
-use App\Openai\Exceptions\OpenaiRefusedResponseException;
-use App\Openai\Exceptions\OpenaiWrongSchemaException;
+use Shanginn\Openai\ChatCompletion\CompletionRequest\JsonSchema\JsonSchemaInterface;
+use Shanginn\Openai\ChatCompletion\CompletionRequest\ResponseFormat;
+use Shanginn\Openai\ChatCompletion\CompletionRequest\ResponseFormatEnum;
+use Shanginn\Openai\ChatCompletion\CompletionRequest\ToolChoice;
+use Shanginn\Openai\ChatCompletion\CompletionRequest\ToolInterface;
+use Shanginn\Openai\ChatCompletion\ErrorResponse;
+use Shanginn\Openai\ChatCompletion\Message\Assistant\KnownFunctionCall;
+use Shanginn\Openai\ChatCompletion\Message\MessageInterface;
+use Shanginn\Openai\ChatCompletion\Message\SchemedAssistantMessage;
+use Shanginn\Openai\ChatCompletion\Message\UserMessage;
+use Shanginn\Openai\Exceptions\OpenaiErrorResponseException;
+use Shanginn\Openai\Exceptions\OpenaiNoChoicesException;
+use Shanginn\Openai\Exceptions\OpenaiNoContentException;
+use Shanginn\Openai\Exceptions\OpenaiRefusedResponseException;
+use Shanginn\Openai\Exceptions\OpenaiWrongSchemaException;
 use InvalidArgumentException;
 
 class OpenaiSimple

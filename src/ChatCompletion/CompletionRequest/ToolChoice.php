@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\Openai\ChatCompletion\CompletionRequest;
+namespace Shanginn\Openai\ChatCompletion\CompletionRequest;
 
-use App\Openai\ChatCompletion\ToolChoice\ToolChoiceType;
+use Shanginn\Openai\ChatCompletion\ToolChoice\ToolChoiceType;
 use InvalidArgumentException;
 
 /**

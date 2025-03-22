@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\Openai\Exceptions;
+namespace Shanginn\Openai\Exceptions;
 
-use App\Openai\ChatCompletion\CompletionResponse;
+use Shanginn\Openai\ChatCompletion\CompletionResponse;
 use InvalidArgumentException;
 
 class OpenaiRefusedResponseException extends OpenaiException

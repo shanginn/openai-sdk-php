@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Openai\ChatCompletion\CompletionResponse;
+namespace Shanginn\Openai\ChatCompletion\CompletionResponse;
 
 use Crell\Serde\Attributes as Serde;
 use Crell\Serde\Renaming\Cases;

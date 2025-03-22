@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace App\Openai\Openai;
+namespace Shanginn\Openai\Openai;
 
-use App\Openai\ChatCompletion\CompletionRequest\JsonSchema\JsonSchemaNormalizer;
-use App\Openai\ChatCompletion\CompletionRequest\ResponseFormatNormalizer;
-use App\Openai\ChatCompletion\Message\Assistant\UnknownFunctionCallImporter;
-use App\Openai\ChatCompletion\Message\User\ImageContentPartNormalizer;
-use App\Openai\ChatCompletion\Tool\ToolNormalizer;
-use App\Openai\ChatCompletion\ToolChoice\ToolChoiceNormalizer;
+use Shanginn\Openai\ChatCompletion\CompletionRequest\JsonSchema\JsonSchemaNormalizer;
+use Shanginn\Openai\ChatCompletion\CompletionRequest\ResponseFormatNormalizer;
+use Shanginn\Openai\ChatCompletion\Message\Assistant\UnknownFunctionCallImporter;
+use Shanginn\Openai\ChatCompletion\Message\User\ImageContentPartNormalizer;
+use Shanginn\Openai\ChatCompletion\Tool\ToolNormalizer;
+use Shanginn\Openai\ChatCompletion\ToolChoice\ToolChoiceNormalizer;
 use Crell\Serde\SerdeCommon;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
 use Symfony\Component\Serializer\NameConverter\CamelCaseToSnakeCaseNameConverter;

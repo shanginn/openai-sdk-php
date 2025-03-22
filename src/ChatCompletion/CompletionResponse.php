@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace App\Openai\ChatCompletion;
+namespace Shanginn\Openai\ChatCompletion;
 
-use App\Openai\ChatCompletion\CompletionResponse\Choice;
-use App\Openai\ChatCompletion\CompletionResponse\Usage;
+use Shanginn\Openai\ChatCompletion\CompletionResponse\Choice;
+use Shanginn\Openai\ChatCompletion\CompletionResponse\Usage;
 use Crell\Serde\Attributes as Serde;
 use Crell\Serde\Renaming\Cases;
 

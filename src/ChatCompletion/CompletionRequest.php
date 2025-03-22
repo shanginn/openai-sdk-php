@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace App\Openai\ChatCompletion;
+namespace Shanginn\Openai\ChatCompletion;
 
-use App\Openai\ChatCompletion\CompletionRequest\ResponseFormat;
-use App\Openai\ChatCompletion\CompletionRequest\StreamOptions;
-use App\Openai\ChatCompletion\CompletionRequest\ToolChoice;
-use App\Openai\ChatCompletion\CompletionRequest\ToolInterface;
+use Shanginn\Openai\ChatCompletion\CompletionRequest\ResponseFormat;
+use Shanginn\Openai\ChatCompletion\CompletionRequest\StreamOptions;
+use Shanginn\Openai\ChatCompletion\CompletionRequest\ToolChoice;
+use Shanginn\Openai\ChatCompletion\CompletionRequest\ToolInterface;
 use Crell\Serde\Attributes\ClassSettings;
 use Crell\Serde\Attributes\PostLoad;
 use Crell\Serde\Renaming\Cases;

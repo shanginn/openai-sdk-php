@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\Openai\ChatCompletion\Message\Assistant;
+namespace Shanginn\Openai\ChatCompletion\Message\Assistant;
 
-use App\Openai\ChatCompletion\CompletionRequest\ToolInterface;
+use Shanginn\Openai\ChatCompletion\CompletionRequest\ToolInterface;
 
 final readonly class KnownFunctionCall implements ToolCallInterface
 {

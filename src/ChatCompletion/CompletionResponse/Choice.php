@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace App\Openai\ChatCompletion\CompletionResponse;
+namespace Shanginn\Openai\ChatCompletion\CompletionResponse;
 
-use App\Openai\ChatCompletion\CompletionRequest\JsonSchema\JsonSchemaInterface;
-use App\Openai\ChatCompletion\Message\AssistantMessage;
-use App\Openai\ChatCompletion\Message\SchemedAssistantMessage;
+use Shanginn\Openai\ChatCompletion\CompletionRequest\JsonSchema\JsonSchemaInterface;
+use Shanginn\Openai\ChatCompletion\Message\AssistantMessage;
+use Shanginn\Openai\ChatCompletion\Message\SchemedAssistantMessage;
 use Crell\Serde\Attributes as Serde;
 use Crell\Serde\Renaming\Cases;
 

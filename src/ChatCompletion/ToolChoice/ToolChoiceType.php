@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Openai\ChatCompletion\ToolChoice;
+namespace Shanginn\Openai\ChatCompletion\ToolChoice;
 
 enum ToolChoiceType: string
 {

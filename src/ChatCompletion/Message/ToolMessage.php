@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\Openai\ChatCompletion\Message;
+namespace Shanginn\Openai\ChatCompletion\Message;
 
-use App\Openai\ChatCompletion\CompletionRequest\Role;
+use Shanginn\Openai\ChatCompletion\CompletionRequest\Role;
 
 class ToolMessage implements MessageInterface
 {

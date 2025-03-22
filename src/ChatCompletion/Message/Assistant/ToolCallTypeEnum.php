@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Openai\ChatCompletion\Message\Assistant;
+namespace Shanginn\Openai\ChatCompletion\Message\Assistant;
 
 enum ToolCallTypeEnum: string
 {

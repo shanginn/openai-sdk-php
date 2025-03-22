@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Openai\Openai;
+namespace Shanginn\Openai\Openai;
 
 interface OpenaiSerializerInterface
 {

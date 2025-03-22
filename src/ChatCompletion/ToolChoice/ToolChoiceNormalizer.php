@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace App\Openai\ChatCompletion\ToolChoice;
+namespace Shanginn\Openai\ChatCompletion\ToolChoice;
 
-use App\Openai\ChatCompletion\CompletionRequest\ToolChoice;
-use App\Openai\ChatCompletion\CompletionRequest\ToolInterface;
+use Shanginn\Openai\ChatCompletion\CompletionRequest\ToolChoice;
+use Shanginn\Openai\ChatCompletion\CompletionRequest\ToolInterface;
 use ArrayObject;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 

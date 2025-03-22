@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\Openai\ChatCompletion\Tool;
+namespace Shanginn\Openai\ChatCompletion\Tool;
 
-use App\Openai\ChatCompletion\CompletionRequest\ToolInterface;
+use Shanginn\Openai\ChatCompletion\CompletionRequest\ToolInterface;
 use ArrayObject;
 use Spiral\JsonSchemaGenerator\Generator;
 use Spiral\JsonSchemaGenerator\GeneratorInterface;

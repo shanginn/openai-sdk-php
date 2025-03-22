@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Openai\Openai;
+namespace Shanginn\Openai\Openai;
 
 use Amp\ByteStream\BufferException;
 use Amp\ByteStream\StreamException;
