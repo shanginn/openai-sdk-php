@@ -19,6 +19,7 @@
         "crell/serde": "^1.3",
         "amphp/http": "^2.1",
         "amphp/file": "^3",
-        "amphp/http-client": "^5.3"
+        "amphp/http-client": "^5.3",
+        "spiral/json-schema-generator": "^1.1"
     }
 }
