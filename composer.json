@@ -1,0 +1,24 @@
+{
+    "name": "shanginn/openai-sdk",
+    "type": "library",
+    "license": "MIT",
+    "version": "1.0.0",
+    "autoload": {
+        "psr-4": {
+            "Shanginn\\Openai\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Nikolai Shangin",
+            "email": "shanginn@gmail.com"
+        }
+    ],
+    "require": {
+        "symfony/serializer": "^7",
+        "crell/serde": "^1.3",
+        "amphp/http": "^2.1",
+        "amphp/file": "^3",
+        "amphp/http-client": "^5.3"
+    }
+}
