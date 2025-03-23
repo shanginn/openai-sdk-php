@@ -21,13 +21,13 @@ use Shanginn\Openai\Openai\OpenaiSerializer;
 use Shanginn\Openai\Openai\OpenaiSerializerInterface;
 use Throwable;
 
-readonly class Openai
+class Openai
 {
-    private OpenaiSerializerInterface $serializer;
+    private readonly OpenaiSerializerInterface $serializer;
 
     public function __construct(
-        private OpenaiClientInterface $client,
-        private string $model = 'gpt-4o-mini',
+        private readonly OpenaiClientInterface $client,
+        private readonly string $model = 'gpt-4o-mini',
     ) {
         $this->serializer = new OpenaiSerializer();
     }

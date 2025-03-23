@@ -24,7 +24,7 @@ use InvalidArgumentException;
 class OpenaiSimple
 {
     public function __construct(
-        protected Openai $openai,
+        protected readonly Openai $openai,
     ) {}
 
     /**
