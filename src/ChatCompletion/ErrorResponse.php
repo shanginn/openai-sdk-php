@@ -17,6 +17,6 @@ final class ErrorResponse
         public ?string $message,
         public ?string $type,
         public ?string $param,
-        public ?string $code,
+        public null|int|string $code,
     ) {}
 }
