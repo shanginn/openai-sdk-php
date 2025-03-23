@@ -21,7 +21,7 @@ use Shanginn\Openai\Openai\OpenaiSerializer;
 use Shanginn\Openai\Openai\OpenaiSerializerInterface;
 use Throwable;
 
-final readonly class Openai
+readonly class Openai
 {
     private OpenaiSerializerInterface $serializer;
 
