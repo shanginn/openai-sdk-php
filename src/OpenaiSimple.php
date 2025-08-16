@@ -20,12 +20,28 @@ use Shanginn\Openai\Exceptions\OpenaiNoContentException;
 use Shanginn\Openai\Exceptions\OpenaiRefusedResponseException;
 use Shanginn\Openai\Exceptions\OpenaiWrongSchemaException;
 use InvalidArgumentException;
+use Shanginn\Openai\Openai\OpenaiClient;
 
 class OpenaiSimple
 {
     public function __construct(
         protected readonly Openai $openai,
     ) {}
+
+    public static function create(
+        string $apiKey,
+        string $model = 'gpt-5-mini',
+        string $apiUrl = 'https://api.openai.com/v1',
+    ): self {
+        $client = new OpenaiClient(
+            apiKey: $apiKey,
+            apiUrl: $apiUrl,
+        );
+
+        $openai = new Openai($client, $model);
+
+        return new self($openai);
+    }
 
     /**
      * @param string                       $system
@@ -34,6 +50,7 @@ class OpenaiSimple
      * @param ?string                      $schema
      * @param ?float                       $temperature
      * @param ?float                       $frequencyPenalty
+     * @param ?int                         $maxCompletionTokens
      * @param ?int                         $maxTokens
      * @param ?float                       $topP
      * @param ?int                         $seed
@@ -48,6 +65,7 @@ class OpenaiSimple
         ?float $temperature = 0.0,
         ?float $frequencyPenalty = null,
         ?int $maxTokens = null,
+        ?int $maxCompletionTokens = null,
         ?float $topP = null,
         ?int $seed = null,
     ): JsonSchemaInterface|string {
@@ -62,6 +80,7 @@ class OpenaiSimple
             system: $system,
             temperature: $temperature,
             maxTokens: $maxTokens,
+            maxCompletionTokens: $maxCompletionTokens,
             frequencyPenalty: $frequencyPenalty,
             responseFormat: $schema !== null
                 ? new ResponseFormat(ResponseFormatEnum::JSON_SCHEMA, $schema)

@@ -31,6 +31,7 @@ final class CompletionRequest
      * @param int|null                                $maxTokens         Optional. The maximum number of tokens that can be generated
      *                                                                   in the chat completion. The total length of input tokens and generated tokens
      *                                                                   is limited by the model's context length.
+     * @param int|null                                $maxCompletionTokens Optional. An upper bound for the number of tokens that can be generated for a completion, including visible output tokens and reasoning tokens.
      * @param float|null                              $frequencyPenalty  Optional. Defaults to 0. Number between -2.0 and 2.0.
      *                                                                   Positive values penalize new tokens based on their existing frequency in the text so far,
      *                                                                   decreasing the model's likelihood to repeat the same line verbatim.
@@ -99,6 +100,7 @@ final class CompletionRequest
         public array $messages,
         public ?float $temperature = null,
         public ?int $maxTokens = null,
+        public ?int $maxCompletionTokens = null,
         public ?float $frequencyPenalty = null,
         public ?array $logitBias = null,
         public ?bool $logprobs = null,

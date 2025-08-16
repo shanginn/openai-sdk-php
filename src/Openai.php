@@ -27,7 +27,7 @@ class Openai
 
     public function __construct(
         private readonly OpenaiClientInterface $client,
-        private readonly string $model = 'gpt-5-mini',
+        private readonly string $model = 'gpt-4.1-mini',
     ) {
         $this->serializer = new OpenaiSerializer();
     }
@@ -39,6 +39,7 @@ class Openai
      * @param ?string                                 $system           the system message to send to the model
      * @param ?float                                  $temperature      What sampling temperature to use, between 0 and 2. Higher values like 0.8 will make the output more random
      * @param ?int                                    $maxTokens        the maximum number of tokens to generate before stopping
+     * @param ?int                                    $maxCompletionTokens the maximum number of tokens to generate in the completion, including visible output tokens and reasoning tokens
      * @param ToolChoice|null                         $toolChoice       specifies how the model should use the provided tools
      * @param array<class-string<ToolInterface>>|null $tools            definitions and descriptions of tools that the model may use during the response generation
      * @param ?ResponseFormat                         $responseFormat
@@ -53,6 +54,7 @@ class Openai
         ?string $system = null,
         ?float $temperature = 0.0,
         ?int $maxTokens = 1024,
+        ?int $maxCompletionTokens = null,
         ?float $frequencyPenalty = null,
         ?ToolChoice $toolChoice = null,
         ?array $tools = null,
@@ -69,6 +71,7 @@ class Openai
             messages: $messages,
             temperature: $temperature,
             maxTokens: $maxTokens,
+            maxCompletionTokens: $maxCompletionTokens,
             frequencyPenalty: $frequencyPenalty,
             responseFormat: $responseFormat,
             seed: $seed,
