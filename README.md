@@ -53,7 +53,7 @@ if ($apiKey === false) {
 
 // 1. Initialize the client and services
 $client = new OpenaiClient($apiKey);
-$openaiCore = new Openai($client, 'gpt-4o-mini'); // Choose your model
+$openaiCore = new Openai($client, 'gpt-5-mini'); // Choose your model
 $openaiSimple = new OpenaiSimple($openaiCore);
 
 // 2. Define prompts
@@ -109,7 +109,7 @@ $client = new OpenaiClient($apiKey); // Optional: Pass custom API URL
 // 2. Initialize the Openai service
 $openai = new Openai(
     client: $client,
-    model: 'gpt-4o-mini' // Choose your desired model
+    model: 'gpt-5-mini' // Choose your desired model
 );
 
 // 3. Prepare your messages
@@ -219,7 +219,7 @@ if ($apiKey === false) {
 }
 
 $client = new OpenaiClient($apiKey);
-$openaiCore = new Openai($client, 'gpt-4o-mini');
+$openaiCore = new Openai($client, 'gpt-5-mini');
 $openaiSimple = new OpenaiSimple($openaiCore);
 
 $system = "You are an assistant that executes tasks by calling tools.";
@@ -278,7 +278,7 @@ if ($apiKey === false) {
 }
 
 $client = new OpenaiClient($apiKey);
-$openai = new Openai($client, 'gpt-4o-mini');
+$openai = new Openai($client, 'gpt-5-mini');
 
 $messages = [
     new UserMessage("Send a low priority notification to user 'jane_doe' saying 'Meeting rescheduled'.")
@@ -411,7 +411,7 @@ if ($apiKey === false) {
 }
 
 $client = new OpenaiClient($apiKey);
-$openaiCore = new Openai($client, 'gpt-4o-mini');
+$openaiCore = new Openai($client, 'gpt-5-mini');
 $openaiSimple = new OpenaiSimple($openaiCore);
 
 // IMPORTANT: You MUST instruct the model to use the specific schema by its name.
@@ -470,7 +470,7 @@ if ($apiKey === false) {
 }
 
 $client = new OpenaiClient($apiKey);
-$openai = new Openai($client, 'gpt-4o-mini');
+$openai = new Openai($client, 'gpt-5-mini');
 
 $messages = [
     new UserMessage('Project deadline discussion is on 2024-09-01 with Charlie.')
@@ -554,8 +554,8 @@ if ($apiKey === false) {
 }
 
 $client = new OpenaiClient($apiKey);
-// Use a model that supports vision, like gpt-4o or gpt-4o-mini
-$openai = new Openai($client, 'gpt-4o-mini');
+// Use a model that supports vision, like gpt-4o or gpt-5-mini
+$openai = new Openai($client, 'gpt-5-mini');
 
 // Example using a URL
 $imageUrl = 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/dd/Gfp-wisconsin-madison-the-nature-boardwalk.jpg/1280px-Gfp-wisconsin-madison-the-nature-boardwalk.jpg';

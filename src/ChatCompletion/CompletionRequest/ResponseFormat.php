@@ -23,7 +23,7 @@ class ResponseFormat
             }
 
             if (!is_a($jsonSchema, JsonSchemaInterface::class, true)) {
-                throw new InvalidArgumentException('schema must implement SchemaInterface');
+                throw new InvalidArgumentException("Schema '$jsonSchema' must implement SchemaInterface");
             }
         }
 

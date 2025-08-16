@@ -42,7 +42,7 @@ final readonly class ToolChoice
     public static function useTool(string $tool): self
     {
         if (!is_a($tool, ToolInterface::class, true)) {
-            throw new InvalidArgumentException('Tool is not a ToolInterface');
+            throw new InvalidArgumentException("Tool '$tool' is not a ToolInterface");
         }
 
         return new self(ToolChoiceType::REQUIRED, $tool);

@@ -52,7 +52,7 @@ class OpenaiSimple
         ?int $seed = null,
     ): JsonSchemaInterface|string {
         if ($schema !== null && !is_a($schema, JsonSchemaInterface::class, true)) {
-            throw new InvalidArgumentException('schema must implement SchemaInterface');
+            throw new InvalidArgumentException("Schema '$schema' must implement SchemaInterface");
         }
 
         $response = $this->openai->completion(

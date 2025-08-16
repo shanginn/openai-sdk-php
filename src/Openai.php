@@ -27,7 +27,7 @@ class Openai
 
     public function __construct(
         private readonly OpenaiClientInterface $client,
-        private readonly string $model = 'gpt-4o-mini',
+        private readonly string $model = 'gpt-5-mini',
     ) {
         $this->serializer = new OpenaiSerializer();
     }
@@ -38,7 +38,7 @@ class Openai
      * @param array<MessageInterface>                 $messages         array of input messages
      * @param ?string                                 $system           the system message to send to the model
      * @param ?float                                  $temperature      What sampling temperature to use, between 0 and 2. Higher values like 0.8 will make the output more random
-     * @param int                                     $maxTokens        the maximum number of tokens to generate before stopping
+     * @param ?int                                    $maxTokens        the maximum number of tokens to generate before stopping
      * @param ToolChoice|null                         $toolChoice       specifies how the model should use the provided tools
      * @param array<class-string<ToolInterface>>|null $tools            definitions and descriptions of tools that the model may use during the response generation
      * @param ?ResponseFormat                         $responseFormat
@@ -52,7 +52,7 @@ class Openai
         array $messages,
         ?string $system = null,
         ?float $temperature = 0.0,
-        int $maxTokens = 1024,
+        ?int $maxTokens = 1024,
         ?float $frequencyPenalty = null,
         ?ToolChoice $toolChoice = null,
         ?array $tools = null,
@@ -60,12 +60,13 @@ class Openai
         ?float $topP = null,
         ?int $seed = null,
     ): CompletionResponse|ErrorResponse {
+        if ($system !== null) {
+            array_unshift($messages, new SystemMessage($system));
+        }
+
         $request = new CompletionRequest(
             model: $this->model,
-            messages: array_merge(
-                [new SystemMessage($system)],
-                $messages
-            ),
+            messages: $messages,
             temperature: $temperature,
             maxTokens: $maxTokens,
             frequencyPenalty: $frequencyPenalty,
