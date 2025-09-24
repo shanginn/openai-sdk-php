@@ -25,7 +25,7 @@ A modern, strongly-typed PHP SDK for interacting with the OpenAI API, focusing i
 Install the package via Composer:
 
 ```bash
-composer require shanginn/openai-sdk-php spiral/json-schema-generator
+composer require shanginn/openai-sdk
 ```
 
 ## Usage
