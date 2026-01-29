@@ -11,6 +11,7 @@ use Shanginn\Openai\ChatCompletion\Message\User\ImageContentPartNormalizer;
 use Shanginn\Openai\ChatCompletion\Tool\ToolNormalizer;
 use Shanginn\Openai\ChatCompletion\ToolChoice\ToolChoiceNormalizer;
 use Crell\Serde\SerdeCommon;
+use Shanginn\Openai\Exceptions\OpenaiDeserializeException;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
 use Symfony\Component\Serializer\NameConverter\CamelCaseToSnakeCaseNameConverter;
 use Symfony\Component\Serializer\Normalizer\AbstractObjectNormalizer;
@@ -59,10 +60,18 @@ class OpenaiSerializer implements OpenaiSerializerInterface
 
     public function deserialize(mixed $serialized, string $to): object
     {
-        return $this->deserializer->deserialize(
-            serialized: $serialized,
-            from: 'json',
-            to: $to
-        );
+        try {
+            return $this->deserializer->deserialize(
+                serialized: $serialized,
+                from: 'json',
+                to: $to
+            );
+        } catch (\Throwable $e) {
+            throw new OpenaiDeserializeException(
+                serialized: $serialized,
+                to: $to,
+                previous: $e
+            );
+        }
     }
 }
