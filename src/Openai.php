@@ -53,7 +53,7 @@ class Openai
         array $messages,
         ?string $system = null,
         ?float $temperature = 0.0,
-        ?int $maxTokens = 1024,
+        ?int $maxTokens = null,
         ?int $maxCompletionTokens = null,
         ?float $frequencyPenalty = null,
         ?ToolChoice $toolChoice = null,
