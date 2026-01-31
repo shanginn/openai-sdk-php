@@ -6,6 +6,7 @@ namespace Shanginn\Openai\Openai;
 
 use Shanginn\Openai\ChatCompletion\CompletionRequest\JsonSchema\JsonSchemaNormalizer;
 use Shanginn\Openai\ChatCompletion\CompletionRequest\ResponseFormatNormalizer;
+use Shanginn\Openai\ChatCompletion\Message\Assistant\ToolCallNormalizer;
 use Shanginn\Openai\ChatCompletion\Message\Assistant\UnknownFunctionCallImporter;
 use Shanginn\Openai\ChatCompletion\Message\User\ImageContentPartNormalizer;
 use Shanginn\Openai\ChatCompletion\Tool\ToolNormalizer;
@@ -35,6 +36,7 @@ class OpenaiSerializer implements OpenaiSerializerInterface
             new ToolNormalizer(),
             new ToolChoiceNormalizer(),
             new ImageContentPartNormalizer(),
+            new ToolCallNormalizer(),
             new ObjectNormalizer(
                 nameConverter: new CamelCaseToSnakeCaseNameConverter()
             ),
