@@ -6,13 +6,10 @@ namespace Shanginn\Openai\ChatCompletion;
 
 use Shanginn\Openai\ChatCompletion\CompletionResponse\Choice;
 use Shanginn\Openai\ChatCompletion\CompletionResponse\Usage;
-use Crell\Serde\Attributes as Serde;
-use Crell\Serde\Renaming\Cases;
 
 /**
  * Represents the response from an API for a message request.
  */
-#[Serde\ClassSettings(renameWith: Cases::snake_case, omitNullFields: true)]
 final class CompletionResponse
 {
     /**
@@ -27,7 +24,6 @@ final class CompletionResponse
      */
     public function __construct(
         public string $id,
-        #[Serde\SequenceField(arrayType: Choice::class)]
         public array $choices,
         public string $model,
         public Usage $usage,

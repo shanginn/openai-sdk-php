@@ -6,14 +6,8 @@ namespace Shanginn\Openai\ChatCompletion\Message;
 
 use Shanginn\Openai\ChatCompletion\CompletionRequest\Role;
 use Shanginn\Openai\ChatCompletion\Message\Assistant\ToolCallInterface;
-use Crell\Serde\Attributes as Serde;
-use Crell\Serde\Renaming\Cases;
 use InvalidArgumentException;
 
-#[Serde\ClassSettings(
-    renameWith: Cases::snake_case,
-    omitNullFields: true
-)]
 class AssistantMessage implements MessageInterface
 {
     /**
@@ -32,7 +26,6 @@ class AssistantMessage implements MessageInterface
         public ?string $content = null,
         public ?string $name = null,
         public ?string $refusal = null,
-        #[Serde\SequenceField(arrayType: ToolCallInterface::class)]
         public ?array $toolCalls = null,
     ) {
         $this->role = Role::ASSISTANT;

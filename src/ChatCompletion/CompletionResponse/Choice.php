@@ -7,13 +7,7 @@ namespace Shanginn\Openai\ChatCompletion\CompletionResponse;
 use Shanginn\Openai\ChatCompletion\CompletionRequest\JsonSchema\JsonSchemaInterface;
 use Shanginn\Openai\ChatCompletion\Message\AssistantMessage;
 use Shanginn\Openai\ChatCompletion\Message\SchemedAssistantMessage;
-use Crell\Serde\Attributes as Serde;
-use Crell\Serde\Renaming\Cases;
 
-#[Serde\ClassSettings(
-    renameWith: Cases::snake_case,
-    omitNullFields: true
-)]
 final readonly class Choice
 {
     /**

@@ -4,16 +4,9 @@ declare(strict_types=1);
 
 namespace Shanginn\Openai\ChatCompletion\CompletionResponse;
 
-use Crell\Serde\Attributes as Serde;
-use Crell\Serde\Renaming\Cases;
-
 /**
  * Represents the usage statistics for the completion request.
  */
-#[Serde\ClassSettings(
-    renameWith: Cases::snake_case,
-    omitNullFields: true
-)]
 final class Usage
 {
     /**

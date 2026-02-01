@@ -8,14 +8,7 @@ use Shanginn\Openai\ChatCompletion\CompletionRequest\ResponseFormat;
 use Shanginn\Openai\ChatCompletion\CompletionRequest\StreamOptions;
 use Shanginn\Openai\ChatCompletion\CompletionRequest\ToolChoice;
 use Shanginn\Openai\ChatCompletion\CompletionRequest\ToolInterface;
-use Crell\Serde\Attributes\ClassSettings;
-use Crell\Serde\Attributes\PostLoad;
-use Crell\Serde\Renaming\Cases;
 
-#[ClassSettings(
-    renameWith: Cases::snake_case,
-    omitNullFields: true,
-)]
 final class CompletionRequest
 {
     /**
@@ -122,7 +115,6 @@ final class CompletionRequest
         $this->validate();
     }
 
-    #[PostLoad]
     private function validate(): void
     {
         assert(
