@@ -98,6 +98,7 @@ class Openai
                 type: $responseData['error']['type'] ?? null,
                 param: $responseData['error']['param'] ?? null,
                 code: $responseData['error']['code'] ?? $responseData['code'] ?? null,
+                rawResponse: $responseJson,
             );
         }
 

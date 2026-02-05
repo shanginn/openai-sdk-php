@@ -18,5 +18,6 @@ final class ErrorResponse
         public ?string $type,
         public ?string $param,
         public null|int|string $code,
+        public string $rawResponse,
     ) {}
 }
