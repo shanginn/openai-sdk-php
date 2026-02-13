@@ -8,8 +8,12 @@ use Shanginn\Openai\ChatCompletion\CompletionRequest\ResponseFormat;
 use Shanginn\Openai\ChatCompletion\CompletionRequest\StreamOptions;
 use Shanginn\Openai\ChatCompletion\CompletionRequest\ToolChoice;
 use Shanginn\Openai\ChatCompletion\CompletionRequest\ToolInterface;
+use Shanginn\Openai\ChatCompletion\Message\MessageInterface;
+use Shanginn\Openai\Util\BackedEnumTypeMap;
 use Crell\Serde\Attributes\ClassSettings;
+use Crell\Serde\Attributes\Field;
 use Crell\Serde\Attributes\PostLoad;
+use Crell\Serde\Attributes\SequenceField;
 use Crell\Serde\Renaming\Cases;
 
 #[ClassSettings(
@@ -22,7 +26,7 @@ final class CompletionRequest
      * @param string                                  $model             Required.
      *                                                                   ID of the model to use. See the model endpoint compatibility
      *                                                                   table for details on which models work with the Chat API.
-     * @param array                                   $messages          Required. A list of messages comprising the conversation so far.
+     * @param MessageInterface[]                      $messages          Required. A list of messages comprising the conversation so far.
      * @param float|null                              $temperature       Optional. Defaults to 1.
      *                                                                   What sampling temperature to use, between 0 and 2.
      *                                                                   Higher values like 0.8 will make the output more random,
@@ -97,6 +101,7 @@ final class CompletionRequest
      */
     public function __construct(
         public string $model,
+        #[SequenceField(arrayType: MessageInterface::class)]
         public array $messages,
         public ?float $temperature = null,
         public ?int $maxTokens = null,

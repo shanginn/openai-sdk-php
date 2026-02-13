@@ -4,8 +4,14 @@ declare(strict_types=1);
 
 namespace Shanginn\Openai\ChatCompletion\Message;
 
+use Crell\Serde\Renaming\Cases;
 use Shanginn\Openai\ChatCompletion\CompletionRequest\Role;
+use Crell\Serde\Attributes as Serde;
 
+#[Serde\ClassSettings(
+    renameWith: Cases::snake_case,
+    omitNullFields: true
+)]
 class ToolMessage implements MessageInterface
 {
     /**

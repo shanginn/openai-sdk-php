@@ -4,14 +4,15 @@ declare(strict_types=1);
 
 namespace Shanginn\Openai\Openai;
 
+use Crell\Serde\SerdeCommon;
 use Shanginn\Openai\ChatCompletion\CompletionRequest\JsonSchema\JsonSchemaNormalizer;
 use Shanginn\Openai\ChatCompletion\CompletionRequest\ResponseFormatNormalizer;
+use Shanginn\Openai\ChatCompletion\CompletionRequest\ToolInterface;
+use Shanginn\Openai\ChatCompletion\Message\Assistant\ToolCallImporter;
 use Shanginn\Openai\ChatCompletion\Message\Assistant\ToolCallNormalizer;
-use Shanginn\Openai\ChatCompletion\Message\Assistant\UnknownFunctionCallImporter;
 use Shanginn\Openai\ChatCompletion\Message\User\ImageContentPartNormalizer;
 use Shanginn\Openai\ChatCompletion\Tool\ToolNormalizer;
 use Shanginn\Openai\ChatCompletion\ToolChoice\ToolChoiceNormalizer;
-use Crell\Serde\SerdeCommon;
 use Shanginn\Openai\Exceptions\OpenaiDeserializeException;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
 use Symfony\Component\Serializer\NameConverter\CamelCaseToSnakeCaseNameConverter;
@@ -24,6 +25,7 @@ use Symfony\Component\Serializer\SerializerInterface;
 class OpenaiSerializer implements OpenaiSerializerInterface
 {
     private SerdeCommon $deserializer;
+    private ToolCallImporter $toolCallImporter;
     public SerializerInterface $serializer;
 
     public function __construct()
@@ -44,10 +46,12 @@ class OpenaiSerializer implements OpenaiSerializerInterface
 
         $this->serializer = new Serializer($normalizers, $encoders);
 
+        $this->toolCallImporter = new ToolCallImporter();
+
         $this->deserializer = new SerdeCommon(
             handlers: [
-                new UnknownFunctionCallImporter(),
-            ]
+                $this->toolCallImporter,
+            ],
         );
     }
 
@@ -60,10 +64,25 @@ class OpenaiSerializer implements OpenaiSerializerInterface
         );
     }
 
-    public function deserialize(mixed $serialized, string $to): object
+    /**
+     * @param array<class-string<ToolInterface>>|null $tools
+     *
+     * @throws OpenaiDeserializeException
+     */
+    public function deserialize(mixed $serialized, string $to, ?array $tools = null): object|array
     {
+        // Set tools map if provided
+        if (!empty($tools)) {
+            $this->toolCallImporter->setTools($tools);
+        }
+
+        // Handle array deserialization
+        if ($to === 'array') {
+            return $this->deserializeArray($serialized);
+        }
+
         try {
-            return $this->deserializer->deserialize(
+            $result = $this->deserializer->deserialize(
                 serialized: $serialized,
                 from: 'json',
                 to: $to
@@ -72,6 +91,38 @@ class OpenaiSerializer implements OpenaiSerializerInterface
             throw new OpenaiDeserializeException(
                 serialized: $serialized,
                 to: $to,
+                previous: $e
+            );
+        }
+
+        return $result;
+    }
+
+    /**
+     * Deserialize an array of messages using Crell\Serde's type map.
+     *
+     * Uses MessagesArray as a wrapper to leverage the BackedEnumTypeMap
+     * on MessageInterface for automatic polymorphic deserialization.
+     *
+     * @throws OpenaiDeserializeException
+     */
+    private function deserializeArray(mixed $serialized): array
+    {
+        try {
+            // Wrap the JSON array in an object structure for deserialization
+            $wrappedJson = json_encode(['messages' => json_decode($serialized, true)]);
+
+            $result = $this->deserializer->deserialize(
+                serialized: $wrappedJson,
+                from: 'json',
+                to: MessagesArray::class
+            );
+
+            return $result->messages;
+        } catch (\Throwable $e) {
+            throw new OpenaiDeserializeException(
+                serialized: $serialized,
+                to: 'array',
                 previous: $e
             );
         }

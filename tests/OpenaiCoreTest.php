@@ -202,7 +202,7 @@ class OpenaiCoreTest extends TestCase
         $this->assertCount(1, $message->toolCalls);
 
         $toolCall = $message->toolCalls[0];
-        dump($toolCall);
+
         // Because deserialization fails, it remains an UnknownFunctionCall
         $this->assertInstanceOf(UnknownFunctionCall::class, $toolCall);
         $this->assertEquals('call_def456', $toolCall->id);

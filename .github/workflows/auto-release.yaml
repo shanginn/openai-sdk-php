@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - master
+      - v2
 
 jobs:
   release:
@@ -12,18 +13,28 @@ jobs:
       contents: write
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Get Version from composer.json
         id: get_version
-        run: echo "::set-output name=version::$(jq -r '.version' composer.json)"
+        run: echo "version=$(jq -r '.version' composer.json)" >> $GITHUB_OUTPUT
         shell: bash
 
       - name: Check if tag exists
         id: check_tag
         run: |
           EXISTS=$(git ls-remote --tags origin refs/tags/${{ steps.get_version.outputs.version }} | wc -l)
-          echo "::set-output name=exists::$EXISTS"
+          echo "exists=$EXISTS" >> $GITHUB_OUTPUT
+        shell: bash
+
+      - name: Determine if prerelease
+        id: is_prerelease
+        run: |
+          if [[ "${{ steps.get_version.outputs.version }}" =~ (alpha|beta|rc|wip) ]]; then
+            echo "prerelease=true" >> $GITHUB_OUTPUT
+          else
+            echo "prerelease=false" >> $GITHUB_OUTPUT
+          fi
         shell: bash
 
       - name: Create Release if tag doesn't exist
@@ -33,6 +44,6 @@ jobs:
           tag_name: ${{ steps.get_version.outputs.version }}
           release_name: Release ${{ steps.get_version.outputs.version }}
           draft: false
-          prerelease: false
+          prerelease: ${{ steps.is_prerelease.outputs.prerelease }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

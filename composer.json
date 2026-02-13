@@ -2,7 +2,7 @@
     "name": "shanginn/openai-sdk",
     "type": "library",
     "license": "MIT",
-    "version": "1.4.1",
+    "version": "2.0.0-beta",
     "autoload": {
         "psr-4": {
             "Shanginn\\Openai\\": "src/"

@@ -11,8 +11,6 @@ use Shanginn\Openai\ChatCompletion\CompletionRequest\ToolChoice;
 use Shanginn\Openai\ChatCompletion\CompletionRequest\ToolInterface;
 use Shanginn\Openai\ChatCompletion\CompletionResponse;
 use Shanginn\Openai\ChatCompletion\ErrorResponse;
-use Shanginn\Openai\ChatCompletion\Message\Assistant\KnownFunctionCall;
-use Shanginn\Openai\ChatCompletion\Message\Assistant\UnknownFunctionCall;
 use Shanginn\Openai\ChatCompletion\Message\AssistantMessage;
 use Shanginn\Openai\ChatCompletion\Message\MessageInterface;
 use Shanginn\Openai\ChatCompletion\Message\SystemMessage;
@@ -87,6 +85,7 @@ class Openai
         $responseData = json_decode($responseJson, associative: true);
 
         if (isset($responseData['error'])) {
+            dump($request, $body, $responseJson);
             if (is_string($responseData['error'])) {
                 $errorMessage = $responseData['error']; // формат x.ai
             } else {
@@ -103,26 +102,10 @@ class Openai
         }
 
         /** @var CompletionResponse $response */
-        $response = $this->serializer->deserialize($responseJson, CompletionResponse::class);
-
-        /** @var array<string,class-string<ToolInterface>> $toolsMap */
-        $toolsMap = array_merge(...array_map(
-            fn (string $tool) => [$tool::getName() => $tool],
-            $tools ?? []
-        ));
+        $response = $this->serializer->deserialize($responseJson, CompletionResponse::class, $tools);
 
         foreach ($response->choices as $i => $choice) {
             if ($choice->message instanceof AssistantMessage) {
-                if (count($choice->message->toolCalls ?? []) > 0) {
-                    $response->choices[$i] = CompletionResponse\Choice::withToolCalls(
-                        $choice,
-                        $this->convertKnownToolCalls(
-                            $choice,
-                            $toolsMap,
-                        )
-                    );
-                }
-
                 if ($responseFormat?->type === ResponseFormatEnum::JSON_SCHEMA) {
                     try {
                         $schemedContent = $this->serializer->deserialize(
@@ -142,43 +125,5 @@ class Openai
         }
 
         return $response;
-    }
-
-    /**
-     * @param CompletionResponse\Choice          $choice
-     * @param array<class-string<ToolInterface>> $toolsMap
-     *
-     * @return list<UnknownFunctionCall|KnownFunctionCall>
-     */
-    public function convertKnownToolCalls(CompletionResponse\Choice $choice, array $toolsMap): array
-    {
-        $toolCalls = [];
-
-        foreach ($choice->message->toolCalls as $calledTool) {
-            if (!$calledTool instanceof UnknownFunctionCall || !isset($toolsMap[$calledTool->name])) {
-                $toolCalls[] = $calledTool;
-
-                continue;
-            }
-
-            $tool = $toolsMap[$calledTool->name];
-
-            try {
-                $toolInput = $this->serializer->deserialize(
-                    serialized: $calledTool->arguments,
-                    to: $tool,
-                );
-            } catch (Throwable $e) {
-                continue;
-            }
-
-            $toolCalls[] = new KnownFunctionCall(
-                id: $calledTool->id,
-                tool: $tool,
-                arguments: $toolInput,
-            );
-        }
-
-        return $toolCalls;
     }
 }
