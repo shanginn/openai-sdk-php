@@ -82,6 +82,40 @@ class OpenaiSerializerTest extends TestCase
         $this->assertEquals($expectedParam, $toolCall->arguments->parameter);
     }
 
+    public function testDeserializeAndSerializeAssistantMessagePreservesReasoningContent(): void
+    {
+        $responseJson = json_encode([
+            'id' => 'chatcmpl-thinking',
+            'object' => 'chat.completion',
+            'created' => time(),
+            'model' => 'qwen/qwen3',
+            'choices' => [
+                [
+                    'index' => 0,
+                    'message' => [
+                        'role' => 'assistant',
+                        'content' => 'Visible answer',
+                        'reasoning_content' => 'Internal reasoning state',
+                    ],
+                    'finish_reason' => 'stop',
+                ],
+            ],
+            'usage' => ['prompt_tokens' => 10, 'completion_tokens' => 5, 'total_tokens' => 15],
+        ]);
+
+        /** @var CompletionResponse $result */
+        $result = $this->serializer->deserialize($responseJson, CompletionResponse::class);
+
+        $message = $result->choices[0]->message;
+        $this->assertInstanceOf(AssistantMessage::class, $message);
+        $this->assertSame('Internal reasoning state', $message->reasoningContent);
+
+        $serializedMessage = $this->serializer->serialize($message);
+        $decodedMessage = json_decode($serializedMessage, true, flags: JSON_THROW_ON_ERROR);
+
+        $this->assertSame('Internal reasoning state', $decodedMessage['reasoning_content'] ?? null);
+    }
+
     public function testDeserializeCompletionResponsePreservesUnknownTools(): void
     {
         $toolId = 'call_def456';
