@@ -44,6 +44,8 @@ class Openai
      * @param ?float                                  $frequencyPenalty
      * @param ?float                                  $topP
      * @param ?int                                    $seed
+     * @param ?string                                 $reasoningEffort  controls effort on reasoning-capable models
+     * @param array<string, mixed>|null               $extraBody        provider-specific JSON fields merged into the request body
      *
      * @return CompletionResponse|ErrorResponse
      */
@@ -59,6 +61,8 @@ class Openai
         ?ResponseFormat $responseFormat = null,
         ?float $topP = null,
         ?int $seed = null,
+        ?string $reasoningEffort = null,
+        ?array $extraBody = null,
     ): CompletionResponse|ErrorResponse {
         if ($system !== null) {
             array_unshift($messages, new SystemMessage($system));
@@ -70,6 +74,7 @@ class Openai
             temperature: $temperature,
             maxTokens: $maxTokens,
             maxCompletionTokens: $maxCompletionTokens,
+            reasoningEffort: $reasoningEffort,
             frequencyPenalty: $frequencyPenalty,
             responseFormat: $responseFormat,
             seed: $seed,
@@ -79,6 +84,10 @@ class Openai
         );
 
         $body = $this->serializer->serialize($request);
+        if ($extraBody !== null && $extraBody !== []) {
+            $bodyData = json_decode($body, associative: true, flags: JSON_THROW_ON_ERROR);
+            $body = json_encode(array_replace($bodyData, $extraBody), JSON_THROW_ON_ERROR);
+        }
 
         $responseJson = $this->client->sendRequest('/chat/completions', $body);
 

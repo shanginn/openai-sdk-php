@@ -95,6 +95,48 @@ class OpenaiCoreTest extends TestCase
         $this->assertEquals('rate_limit_exceeded', $response->code);
     }
 
+    public function testCoreCompletionMergesExtraBodyAndReasoningEffort(): void
+    {
+        $mockApiResponse = json_encode([
+            'id' => 'chatcmpl-core-extra-body',
+            'object' => 'chat.completion',
+            'created' => time(),
+            'model' => 'deepseek-v4-pro',
+            'choices' => [
+                [
+                    'index' => 0,
+                    'message' => ['role' => 'assistant', 'content' => 'ok'],
+                    'finish_reason' => 'stop',
+                ],
+            ],
+            'usage' => ['prompt_tokens' => 3, 'completion_tokens' => 1, 'total_tokens' => 4],
+        ]);
+
+        $this->mockClient
+            ->shouldReceive('sendRequest')
+            ->once()
+            ->withArgs(function (string $method, string $body) {
+                $this->assertEquals('/chat/completions', $method);
+                $data = json_decode($body, true);
+                $this->assertSame('high', $data['reasoning_effort']);
+                $this->assertSame(['type' => 'disabled'], $data['thinking']);
+                $this->assertArrayNotHasKey('extra_body', $data);
+
+                return true;
+            })
+            ->andReturn($mockApiResponse);
+
+        $response = $this->openai->completion(
+            messages: [new UserMessage('Test')],
+            reasoningEffort: 'high',
+            extraBody: [
+                'thinking' => ['type' => 'disabled'],
+            ],
+        );
+
+        $this->assertInstanceOf(CompletionResponse::class, $response);
+    }
+
     // ========== Tool Calling Tests ==========
 
     public function testCoreToolCallKnownFunctionSuccess(): void

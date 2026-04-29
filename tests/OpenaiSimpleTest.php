@@ -81,6 +81,100 @@ class OpenaiSimpleTest extends TestCase
         $this->assertEquals($expectedResponseContent, $result);
     }
 
+    public function testSimpleConfigCanDisableThinkingAndOmitReasoningEffort(): void
+    {
+        $mockApiResponse = json_encode([
+            'id' => 'chatcmpl-simple-thinking',
+            'object' => 'chat.completion',
+            'created' => time(),
+            'model' => 'deepseek-v4-pro',
+            'choices' => [
+                [
+                    'index' => 0,
+                    'message' => [
+                        'role' => 'assistant',
+                        'content' => 'ok',
+                    ],
+                    'finish_reason' => 'stop',
+                ],
+            ],
+            'usage' => ['prompt_tokens' => 3, 'completion_tokens' => 1, 'total_tokens' => 4],
+        ]);
+
+        $this->openaiSimple = new OpenaiSimple(
+            openai: $this->openaiCore,
+            thinkingEnabled: false,
+            reasoningEffort: 'high',
+        );
+
+        $this->mockClient
+            ->shouldReceive('sendRequest')
+            ->once()
+            ->withArgs(function (string $method, string $body) {
+                $this->assertEquals('/chat/completions', $method);
+                $data = json_decode($body, true);
+                $this->assertSame(['type' => 'disabled'], $data['thinking']);
+                $this->assertArrayNotHasKey('reasoning_effort', $data);
+
+                return true;
+            })
+            ->andReturn($mockApiResponse);
+
+        $result = $this->openaiSimple->generate(
+            system: 'Test',
+            userMessage: 'Test',
+        );
+
+        $this->assertEquals('ok', $result);
+    }
+
+    public function testSimpleConfigCanEnableThinkingWithReasoningEffort(): void
+    {
+        $mockApiResponse = json_encode([
+            'id' => 'chatcmpl-simple-thinking-enabled',
+            'object' => 'chat.completion',
+            'created' => time(),
+            'model' => 'deepseek-v4-pro',
+            'choices' => [
+                [
+                    'index' => 0,
+                    'message' => [
+                        'role' => 'assistant',
+                        'content' => 'ok',
+                    ],
+                    'finish_reason' => 'stop',
+                ],
+            ],
+            'usage' => ['prompt_tokens' => 3, 'completion_tokens' => 1, 'total_tokens' => 4],
+        ]);
+
+        $this->openaiSimple = new OpenaiSimple(
+            openai: $this->openaiCore,
+            thinkingEnabled: true,
+            reasoningEffort: 'high',
+        );
+
+        $this->mockClient
+            ->shouldReceive('sendRequest')
+            ->once()
+            ->withArgs(function (string $method, string $body) {
+                $this->assertEquals('/chat/completions', $method);
+                $data = json_decode($body, true);
+                $this->assertSame(['type' => 'enabled'], $data['thinking']);
+                $this->assertSame('high', $data['reasoning_effort']);
+
+                return true;
+            })
+            ->andReturn($mockApiResponse);
+
+        $result = $this->openaiSimple->generate(
+            system: 'Test',
+            userMessage: 'Test',
+        );
+
+        $this->assertEquals('ok', $result);
+    }
+
     public function testSimpleTextGenerationThrowsApiError(): void
     {
         $this->expectException(OpenaiErrorResponseException::class);

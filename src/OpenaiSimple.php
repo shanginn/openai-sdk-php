@@ -24,14 +24,26 @@ use Shanginn\Openai\Openai\OpenaiClient;
 
 class OpenaiSimple
 {
+    /**
+     * @param array<string, mixed> $extraBody
+     */
     public function __construct(
         protected readonly Openai $openai,
+        private readonly ?bool $thinkingEnabled = null,
+        private readonly ?string $reasoningEffort = null,
+        private readonly array $extraBody = [],
     ) {}
 
+    /**
+     * @param array<string, mixed> $extraBody
+     */
     public static function create(
         string $apiKey,
         string $model = 'gpt-5-mini',
         string $apiUrl = 'https://api.openai.com/v1',
+        ?bool $thinkingEnabled = null,
+        ?string $reasoningEffort = null,
+        array $extraBody = [],
     ): self {
         $client = new OpenaiClient(
             apiKey: $apiKey,
@@ -40,7 +52,12 @@ class OpenaiSimple
 
         $openai = new Openai($client, $model);
 
-        return new self($openai);
+        return new self(
+            openai: $openai,
+            thinkingEnabled: $thinkingEnabled,
+            reasoningEffort: $reasoningEffort,
+            extraBody: $extraBody,
+        );
     }
 
     /**
@@ -54,6 +71,9 @@ class OpenaiSimple
      * @param ?int                         $maxTokens
      * @param ?float                       $topP
      * @param ?int                         $seed
+     * @param ?string                      $reasoningEffort
+     * @param ?bool                        $thinkingEnabled
+     * @param array<string, mixed>|null    $extraBody
      *
      * @return JsonSchemaInterface
      */
@@ -68,6 +88,9 @@ class OpenaiSimple
         ?int $maxCompletionTokens = null,
         ?float $topP = null,
         ?int $seed = null,
+        ?string $reasoningEffort = null,
+        ?bool $thinkingEnabled = null,
+        ?array $extraBody = null,
     ): JsonSchemaInterface|string {
         if ($schema !== null && !is_a($schema, JsonSchemaInterface::class, true)) {
             throw new InvalidArgumentException("Schema '$schema' must implement SchemaInterface");
@@ -87,6 +110,8 @@ class OpenaiSimple
                 : null,
             topP: $topP,
             seed: $seed,
+            reasoningEffort: $this->buildReasoningEffort($reasoningEffort, $thinkingEnabled, $extraBody),
+            extraBody: $this->buildExtraBody($thinkingEnabled, $extraBody),
         );
 
         if ($response instanceof ErrorResponse) {
@@ -127,6 +152,9 @@ class OpenaiSimple
      * @param array|null      $history
      * @param float|null      $temperature
      * @param float|null      $frequencyPenalty
+     * @param ?string         $reasoningEffort
+     * @param ?bool           $thinkingEnabled
+     * @param array<string, mixed>|null $extraBody
      *
      * @return T
      */
@@ -137,6 +165,9 @@ class OpenaiSimple
         ?array $history = [],
         ?float $temperature = 0.0,
         ?float $frequencyPenalty = 0.0,
+        ?string $reasoningEffort = null,
+        ?bool $thinkingEnabled = null,
+        ?array $extraBody = null,
     ): ToolInterface {
         $response = $this->openai->completion(
             messages: array_merge($history, [
@@ -145,8 +176,10 @@ class OpenaiSimple
             system: $system,
             temperature: $temperature,
             frequencyPenalty: $frequencyPenalty,
+            reasoningEffort: $this->buildReasoningEffort($reasoningEffort, $thinkingEnabled, $extraBody),
             toolChoice: ToolChoice::useTool($tool),
             tools: [$tool],
+            extraBody: $this->buildExtraBody($thinkingEnabled, $extraBody),
         );
 
         if ($response instanceof ErrorResponse) {
@@ -170,5 +203,55 @@ class OpenaiSimple
         }
 
         return $choice->arguments;
+    }
+
+    /**
+     * @param array<string, mixed>|null $extraBody
+     *
+     * @return array<string, mixed>|null
+     */
+    private function buildExtraBody(?bool $thinkingEnabled, ?array $extraBody): ?array
+    {
+        $body = array_replace($this->extraBody, $extraBody ?? []);
+        $effectiveThinkingEnabled = $thinkingEnabled ?? $this->thinkingEnabled;
+
+        if ($effectiveThinkingEnabled !== null) {
+            $body['thinking'] = [
+                'type' => $effectiveThinkingEnabled ? 'enabled' : 'disabled',
+            ];
+        }
+
+        return $body === [] ? null : $body;
+    }
+
+    /**
+     * @param array<string, mixed>|null $extraBody
+     */
+    private function buildReasoningEffort(
+        ?string $reasoningEffort,
+        ?bool $thinkingEnabled,
+        ?array $extraBody,
+    ): ?string {
+        if ($this->isThinkingDisabled($thinkingEnabled, $extraBody)) {
+            return null;
+        }
+
+        return $reasoningEffort ?? $this->reasoningEffort;
+    }
+
+    /**
+     * @param array<string, mixed>|null $extraBody
+     */
+    private function isThinkingDisabled(?bool $thinkingEnabled, ?array $extraBody): bool
+    {
+        $effectiveThinkingEnabled = $thinkingEnabled ?? $this->thinkingEnabled;
+
+        if ($effectiveThinkingEnabled !== null) {
+            return !$effectiveThinkingEnabled;
+        }
+
+        $body = array_replace($this->extraBody, $extraBody ?? []);
+
+        return ($body['thinking']['type'] ?? null) === 'disabled';
     }
 }

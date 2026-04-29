@@ -98,6 +98,7 @@ final class CompletionRequest
      *                                                                   during tool use.
      * @param string|null                             $user              Optional. A unique identifier representing your end-user,
      *                                                                   which can help OpenAI to monitor and detect abuse.
+     * @param string|null                             $reasoningEffort   Optional. Controls effort on reasoning-capable models.
      */
     public function __construct(
         public string $model,
@@ -123,6 +124,7 @@ final class CompletionRequest
         public ?ToolChoice $toolChoice = null,
         public ?bool $parallelToolCalls = null,
         public ?string $user = null,
+        public ?string $reasoningEffort = null,
     ) {
         $this->validate();
     }

@@ -148,6 +148,36 @@ try {
 
 ```
 
+### Provider-Specific Body Params and Thinking Control
+
+Use `extraBody` for provider-specific request fields that are not part of the typed SDK yet. These fields are merged into the top-level JSON request body, so this:
+
+```php
+$response = $openai->completion(
+    messages: [new UserMessage('Answer briefly.')],
+    reasoningEffort: 'high',
+    extraBody: [
+        'thinking' => ['type' => 'disabled'],
+    ],
+);
+```
+
+sends `reasoning_effort` and `thinking` at the request root, matching OpenAI-compatible providers such as DeepSeek.
+
+For `OpenaiSimple`, configure thinking once. When `thinkingEnabled` is `false`, `OpenaiSimple` automatically omits `reasoning_effort`, because DeepSeek rejects disabled thinking with an effort value.
+
+```php
+$openaiSimple = OpenaiSimple::create(
+    apiKey: $apiKey,
+    model: 'deepseek-v4-pro',
+    apiUrl: $deepseekApiUrl,
+    thinkingEnabled: false,
+    reasoningEffort: 'high',
+);
+```
+
+You can still override per request with `thinkingEnabled`, `reasoningEffort`, or `extraBody` on `generate()` and `callTool()`.
+
 ## Advanced Usage
 
 ### Tool Calling
