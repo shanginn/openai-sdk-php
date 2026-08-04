@@ -21,6 +21,7 @@ use Shanginn\Openai\Exceptions\OpenaiRefusedResponseException;
 use Shanginn\Openai\Exceptions\OpenaiWrongSchemaException;
 use InvalidArgumentException;
 use Shanginn\Openai\Openai\OpenaiClient;
+use Shanginn\Openai\Provider\Provider;
 
 class OpenaiSimple
 {
@@ -39,18 +40,19 @@ class OpenaiSimple
      */
     public static function create(
         string $apiKey,
-        string $model = 'gpt-5-mini',
+        string $model = 'gpt-5.6',
         string $apiUrl = 'https://api.openai.com/v1',
         ?bool $thinkingEnabled = null,
         ?string $reasoningEffort = null,
         array $extraBody = [],
+        Provider $provider = Provider::OPENAI,
     ): self {
         $client = new OpenaiClient(
             apiKey: $apiKey,
             apiUrl: $apiUrl,
         );
 
-        $openai = new Openai($client, $model);
+        $openai = new Openai($client, $model, $provider);
 
         return new self(
             openai: $openai,
@@ -82,7 +84,7 @@ class OpenaiSimple
         string|UserMessage $userMessage,
         ?array $history = [],
         ?string $schema = null,
-        ?float $temperature = 0.0,
+        ?float $temperature = null,
         ?float $frequencyPenalty = null,
         ?int $maxTokens = null,
         ?int $maxCompletionTokens = null,
@@ -163,8 +165,8 @@ class OpenaiSimple
         string $text,
         string $tool,
         ?array $history = [],
-        ?float $temperature = 0.0,
-        ?float $frequencyPenalty = 0.0,
+        ?float $temperature = null,
+        ?float $frequencyPenalty = null,
         ?string $reasoningEffort = null,
         ?bool $thinkingEnabled = null,
         ?array $extraBody = null,

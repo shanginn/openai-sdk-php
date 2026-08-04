@@ -22,6 +22,7 @@ use Shanginn\Openai\ChatCompletion\Message\User\TextContentPart;
 use Shanginn\Openai\ChatCompletion\Message\User\ImageContentPart;
 use Shanginn\Openai\ChatCompletion\CompletionResponse;
 use Shanginn\Openai\ChatCompletion\ErrorResponse;
+use Shanginn\Openai\Provider\Provider;
 
  use Tests\SampleJsonSchema;
  use Tests\SampleTool;
@@ -97,6 +98,12 @@ class OpenaiCoreTest extends TestCase
 
     public function testCoreCompletionMergesExtraBodyAndReasoningEffort(): void
     {
+        $this->openai = new Openai(
+            $this->mockClient,
+            'deepseek-v4-pro',
+            Provider::DEEPSEEK,
+        );
+
         $mockApiResponse = json_encode([
             'id' => 'chatcmpl-core-extra-body',
             'object' => 'chat.completion',
@@ -109,7 +116,13 @@ class OpenaiCoreTest extends TestCase
                     'finish_reason' => 'stop',
                 ],
             ],
-            'usage' => ['prompt_tokens' => 3, 'completion_tokens' => 1, 'total_tokens' => 4],
+            'usage' => [
+                'prompt_tokens' => 3,
+                'completion_tokens' => 1,
+                'total_tokens' => 4,
+                'prompt_cache_hit_tokens' => 2,
+                'prompt_cache_miss_tokens' => 1,
+            ],
         ]);
 
         $this->mockClient
@@ -118,7 +131,7 @@ class OpenaiCoreTest extends TestCase
             ->withArgs(function (string $method, string $body) {
                 $this->assertEquals('/chat/completions', $method);
                 $data = json_decode($body, true);
-                $this->assertSame('high', $data['reasoning_effort']);
+                $this->assertArrayNotHasKey('reasoning_effort', $data);
                 $this->assertSame(['type' => 'disabled'], $data['thinking']);
                 $this->assertArrayNotHasKey('extra_body', $data);
 
@@ -135,6 +148,8 @@ class OpenaiCoreTest extends TestCase
         );
 
         $this->assertInstanceOf(CompletionResponse::class, $response);
+        $this->assertSame(2, $response->usage->promptCacheHitTokens);
+        $this->assertSame('deepseek-v4-pro', $response->raw['model']);
     }
 
     // ========== Tool Calling Tests ==========

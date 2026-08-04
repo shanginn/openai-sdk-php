@@ -11,6 +11,7 @@ use Shanginn\Openai\ChatCompletion\CompletionResponse\Usage;
 use Shanginn\Openai\ChatCompletion\Message\Assistant\KnownFunctionCall;
 use Shanginn\Openai\ChatCompletion\Message\Assistant\UnknownFunctionCall;
 use Shanginn\Openai\ChatCompletion\Message\AssistantMessage;
+use Shanginn\Openai\ChatCompletion\Message\DeveloperMessage;
 use Shanginn\Openai\ChatCompletion\Message\MessageInterface;
 use Shanginn\Openai\ChatCompletion\Message\SystemMessage;
 use Shanginn\Openai\ChatCompletion\Message\ToolMessage;
@@ -25,6 +26,17 @@ class OpenaiSerializerTest extends TestCase
     {
         parent::setUp();
         $this->serializer = new OpenaiSerializer();
+    }
+
+    public function testSerializeLatestDeveloperRole(): void
+    {
+        $serialized = $this->serializer->serialize(
+            new DeveloperMessage('Follow the application policy.'),
+        );
+        $message = json_decode($serialized, true, flags: JSON_THROW_ON_ERROR);
+
+        $this->assertSame('developer', $message['role']);
+        $this->assertSame('Follow the application policy.', $message['content']);
     }
 
     public function testDeserializeCompletionResponseConvertsKnownTools(): void

@@ -6,33 +6,40 @@
 [![Build Status](https://github.com/shanginn/openai-sdk-php/actions/workflows/ci.yml/badge.svg)](https://github.com/shanginn/openai-sdk-php/actions/workflows/ci.yml) <!-- Replace with actual repo path -->
 [![Coverage Status](https://coveralls.io/repos/github/shanginn/openai-sdk-php/badge.svg?branch=main)](https://coveralls.io/github/shanginn/openai-sdk-php?branch=main) <!-- Replace with actual repo path -->
 
-A modern, strongly-typed PHP SDK for interacting with the OpenAI API, focusing initially on the Chat Completions endpoint. Built with asynchronous capabilities in mind using `amphp/http-client` and robust serialization/deserialization via `crell/serde`.
+A strongly typed, truly asynchronous PHP SDK for the OpenAI Responses and Chat Completions APIs. The transport uses native [PHP True Async](https://github.com/true-async) coroutines and async-aware cURL, with compatibility profiles for OpenAI, DeepSeek, Qwen, xAI/Grok, and custom OpenAI-compatible providers.
 
 ## Features
 
-*   Access to the OpenAI Chat Completions API (`/v1/chat/completions`).
+*   **Responses API:** Typed requests and forward-compatible response items for `/v1/responses`, the recommended API for new OpenAI and xAI integrations.
+*   **Chat Completions:** Backward-compatible, strongly typed access to `/v1/chat/completions`.
 *   **Strongly-Typed Objects:** Uses PHP classes for Requests, Responses, Messages, Tools, and Schemas, providing better IDE autocompletion and type safety.
 *   **Tool Calling:** Define and use tools (functions) that the OpenAI models can invoke. Includes automatic deserialization of tool arguments into PHP objects based on class definitions with attributes like `Spiral\JsonSchemaGenerator\Attribute\Field`.
 *   **JSON Schema Mode:** Force the model to output JSON conforming to a specific structure defined by your PHP classes implementing `JsonSchemaInterface`, utilizing attributes like `Spiral\JsonSchemaGenerator\Attribute\Field` for detailed schema generation.
-*   **Image Input:** Supports sending images along with text prompts using `UserMessage` and `ImageContentPart` (compatible with models like GPT-4o).
-*   **Asynchronous Client:** Leverages `amphp/http-client` for non-blocking I/O (though the current `OpenaiClient` implementation buffers the full response).
+*   **Multimodal Input:** Supports image content, including the latest `original` image detail level.
+*   **True Async:** Returns native `Async\Coroutine` objects, supports cancellation, concurrent requests, and streams SSE data through `Async\Channel`.
+*   **Provider Compatibility:** Normalizes documented parameter differences without restricting model IDs to a hard-coded allowlist.
 *   **Serialization:** Uses `crell/serde` and `symfony/serializer` for mapping between PHP objects and OpenAI's JSON format.
 *   **Simplified Wrapper:** Includes an `OpenaiSimple` class for common use cases like simple text generation, JSON object generation, and tool calling with less boilerplate.
 *   **Custom Exceptions:** Provides specific exceptions for different API error conditions (e.g., `OpenaiErrorResponseException`, `OpenaiNoChoicesException`, `OpenaiWrongSchemaException`).
 
 ## Installation
 
-Install the package via Composer:
+PHP 8.6+ with the [True Async runtime](https://true-async.github.io/download/) and cURL extensions is required. Install the SDK via Composer:
 
 ```bash
 composer require shanginn/openai-sdk
 ```
 
+The package requires `ext-true_async` 0.8.2+ and includes
+`true-async/ide-helper` for IDE and static-analysis support.
+
 ## Usage
 
-### Simple Text Generation (`OpenaiSimple`)
+### Responses API (Recommended)
 
-This is the easiest way to get a text response for a simple prompt.
+OpenAI and xAI recommend the Responses API for new integrations. The response
+object retains every raw output item, while providing helpers for text,
+refusals, function calls, and reasoning items.
 
 ```php
 <?php
@@ -40,143 +47,221 @@ This is the easiest way to get a text response for a simple prompt.
 require 'vendor/autoload.php';
 
 use Shanginn\Openai\Openai;
-use Shanginn\Openai\OpenaiSimple;
 use Shanginn\Openai\Openai\OpenaiClient;
-use Shanginn\Openai\Exceptions\OpenaiErrorResponseException;
-use Shanginn\Openai\Exceptions\OpenaiException;
+use Shanginn\Openai\Responses\ResponseRequest;
+use Shanginn\Openai\ChatCompletion\ErrorResponse;
 
-// Ensure you have your OpenAI API Key
 $apiKey = getenv('OPENAI_API_KEY');
 if ($apiKey === false) {
-    throw new \RuntimeException('Error: OPENAI_API_KEY environment variable not set.');
+    throw new RuntimeException('OPENAI_API_KEY is not set.');
 }
 
-// 1. Initialize the client and services
-$client = new OpenaiClient($apiKey);
-$openaiCore = new Openai($client, 'gpt-4.1-mini'); // Choose your model
-$openaiSimple = new OpenaiSimple($openaiCore);
+$openai = new Openai(new OpenaiClient($apiKey));
+$response = $openai->response(new ResponseRequest(
+    model: 'gpt-5.6-terra',
+    instructions: 'Answer accurately and concisely.',
+    input: 'Why is the sky blue?',
+    reasoning: ['effort' => 'medium'],
+    store: false,
+));
 
-// 2. Define prompts
-$systemPrompt = "You are a helpful assistant that translates English to French.";
-$userPrompt = "Hello, world!";
-$history = []; // Optional: Add previous MessageInterface objects
+if ($response instanceof ErrorResponse) {
+    throw new RuntimeException($response->message ?? 'Unknown API error');
+}
 
-// 3. Generate the response
-try {
-    $result = $openaiSimple->generate(
-        system: $systemPrompt,
-        userMessage: $userPrompt,
-        history: $history,
-        temperature: 0.7
-    );
+echo $response->outputText();
+```
 
-    echo "Assistant: {$result}\n";
-    // Example Output: Assistant: Bonjour, le monde !
+The request object intentionally accepts `extraBody`, and the response retains
+the complete decoded payload in `$response->raw`. This keeps new model and
+provider fields usable without waiting for an SDK release.
 
-} catch (OpenaiErrorResponseException $e) {
-    echo "API Error: {$e->response->message}\n";
-} catch (OpenaiException $e) {
-    echo "SDK Exception: {$e->getMessage()}\n";
-} catch (\Throwable $e) {
-     echo "General Error: {$e->getMessage()}\n";
+`ResponseRequest::$reasoning` accepts the current GPT-5.6 controls, including
+effort levels through `max`, `mode: pro`, and persisted-reasoning `context`.
+Typed prompt-cache, safety identifier, service tier, and continuation fields are
+included. Raw tool arrays and output items preserve newer features such as
+programmatic tool calling without lossy deserialization.
+
+### True Async Concurrency and Streaming
+
+Every asynchronous request returns a native `Async\Coroutine`. Standard cURL
+calls become non-blocking inside the True Async runtime, so several API requests
+can progress concurrently without an alternative HTTP stack.
+
+```php
+use Shanginn\Openai\Responses\ResponseRequest;
+use function Async\await_all_or_fail;
+use function Async\timeout;
+
+$requests = [
+    $openai->responseAsync(new ResponseRequest('gpt-5.6-terra', 'Summarize PHP fibers.')),
+    $openai->responseAsync(new ResponseRequest('gpt-5.6-luna', 'Explain event loops.')),
+];
+
+$responses = await_all_or_fail($requests, timeout(30_000));
+
+foreach ($openai->streamResponse(new ResponseRequest(
+    model: 'gpt-5.6-terra',
+    input: 'Write a short haiku.',
+)) as $event) {
+    // For example: response.output_text.delta
+    var_dump($event);
 }
 ```
 
-### Basic Completion (`Openai` Core Class)
+Coroutines can be cancelled through their native `cancel()` method. The default
+HTTP timeout is one hour to accommodate long-running reasoning models; override
+it in the `OpenaiClient` constructor when appropriate.
 
-If you need more control over the request parameters or want to handle the response object directly.
+### Simple Text Generation (`OpenaiSimple`)
+
+`OpenaiSimple` remains the shortest path for Chat Completions:
 
 ```php
-<?php
+use Shanginn\Openai\OpenaiSimple;
 
-require 'vendor/autoload.php';
+$openai = OpenaiSimple::create(
+    apiKey: $apiKey,
+);
 
+echo $openai->generate(
+    system: 'Translate English to French.',
+    userMessage: 'Hello, world!',
+);
+```
+
+### Chat Completions
+
+Chat Completions remains supported for existing applications and providers that
+do not yet expose the Responses API.
+
+```php
 use Shanginn\Openai\Openai;
 use Shanginn\Openai\Openai\OpenaiClient;
 use Shanginn\Openai\ChatCompletion\Message\UserMessage;
 use Shanginn\Openai\ChatCompletion\ErrorResponse;
-use Shanginn\Openai\Exceptions\OpenaiException;
 
-// Ensure you have your OpenAI API Key
-$apiKey = getenv('OPENAI_API_KEY');
-if ($apiKey === false) {
-    throw new \RuntimeException('Error: OPENAI_API_KEY environment variable not set.');
-}
-
-// 1. Initialize the HTTP Client
-$client = new OpenaiClient($apiKey); // Optional: Pass custom API URL
-
-// 2. Initialize the Openai service
 $openai = new Openai(
-    client: $client,
-    model: 'gpt-4.1-mini' // Choose your desired model
+    client: new OpenaiClient($apiKey),
+    model: 'gpt-5.6',
 );
 
-// 3. Prepare your messages
-$messages = [
-    new UserMessage(content: 'What is the chemical symbol for water?')
-];
+$response = $openai->completion(
+    messages: [new UserMessage('What is the chemical symbol for water?')],
+    maxCompletionTokens: 50,
+);
 
-// 4. Make the completion request
-try {
-    $response = $openai->completion(
-        messages: $messages,
-        temperature: 0.5, // Optional parameters
-        maxTokens: 50
-    );
-
-    // 5. Handle the response
-    if ($response instanceof ErrorResponse) {
-        // Handle API error (e.g., authentication, rate limits)
-        echo "API Error: {$response->message} (Type: {$response->type}, Code: {$response->code})\n";
-    } elseif (count($response->choices) > 0) {
-        // Get the first choice's message content
-        $content = $response->choices[0]->message->content;
-        echo "Assistant: {$content}\n";
-        // Example Output: Assistant: The chemical symbol for water is H₂O.
-    } else {
-        echo "No choices returned.\n";
-    }
-
-} catch (OpenaiException $e) {
-    // Handle SDK-specific exceptions or transport errors
-    echo "SDK Exception: {$e->getMessage()}\n";
-} catch (\Throwable $e) {
-    // Handle other potential errors (e.g., network issues from client)
-     echo "General Error: {$e->getMessage()}\n";
+if ($response instanceof ErrorResponse) {
+    throw new RuntimeException($response->message ?? 'Unknown API error');
 }
 
+echo $response->choices[0]->message->content;
 ```
 
-### Provider-Specific Body Params and Thinking Control
+For GPT-5.6 tool calls through Chat Completions, the compatibility profile
+automatically supplies `reasoning_effort: none` when no effort was provided,
+matching the current OpenAI tool-calling constraint. Use a
+`DeveloperMessage` when you need the current developer role explicitly.
 
-Use `extraBody` for provider-specific request fields that are not part of the typed SDK yet. These fields are merged into the top-level JSON request body, so this:
+### Models and Provider Compatibility
+
+Model IDs are plain strings and are never restricted to an SDK allowlist. For
+OpenAI, `gpt-5.6` aliases the frontier `gpt-5.6-sol` model,
+`gpt-5.6-terra` balances intelligence and cost, and `gpt-5.6-luna` is
+optimized for high-volume work. The SDK defaults Chat Completions to the
+`gpt-5.6` alias.
+
+Choose a provider profile when constructing `Openai`. It normalizes only known,
+documented incompatibilities; `Provider::CUSTOM` sends the body unchanged.
+
+#### DeepSeek
+
+DeepSeek currently exposes `deepseek-v4-pro` through Chat Completions.
+`deepseek-v4-flash` can also use the Responses API.
 
 ```php
-$response = $openai->completion(
+use Shanginn\Openai\Openai;
+use Shanginn\Openai\Openai\OpenaiClient;
+use Shanginn\Openai\Provider\Provider;
+use Shanginn\Openai\ChatCompletion\Message\UserMessage;
+
+$deepseek = new Openai(
+    client: new OpenaiClient($deepseekApiKey, 'https://api.deepseek.com'),
+    model: 'deepseek-v4-pro',
+    provider: Provider::DEEPSEEK,
+);
+
+$response = $deepseek->completion(
     messages: [new UserMessage('Answer briefly.')],
     reasoningEffort: 'high',
-    extraBody: [
-        'thinking' => ['type' => 'disabled'],
-    ],
+    extraBody: ['thinking' => ['type' => 'enabled']],
 );
 ```
 
-sends `reasoning_effort` and `thinking` at the request root, matching OpenAI-compatible providers such as DeepSeek.
+In thinking mode, unsupported sampling and log-probability parameters are
+removed automatically. When continuing a DeepSeek tool-call conversation,
+preserve the assistant message's `reasoning_content`; the included
+`AssistantMessage` type serializes it.
 
-For `OpenaiSimple`, configure thinking once. When `thinkingEnabled` is `false`, `OpenaiSimple` automatically omits `reasoning_effort`, because DeepSeek rejects disabled thinking with an effort value.
+#### Qwen
+
+Pass the exact Model Studio workspace endpoint for your region. Qwen's
+Responses API uses standard `reasoning.effort`; for Chat Completions the SDK
+translates the generic `thinking` field to `enable_thinking`.
 
 ```php
-$openaiSimple = OpenaiSimple::create(
-    apiKey: $apiKey,
-    model: 'deepseek-v4-pro',
-    apiUrl: $deepseekApiUrl,
-    thinkingEnabled: false,
-    reasoningEffort: 'high',
+$qwen = new Openai(
+    client: new OpenaiClient($qwenApiKey, $qwenWorkspaceUrl),
+    model: 'qwen3.7-plus',
+    provider: Provider::QWEN,
 );
+
+$response = $qwen->response(new ResponseRequest(
+    model: 'qwen3.7-plus',
+    input: 'Solve this carefully: 17 * 23',
+    reasoning: ['effort' => 'high'],
+));
 ```
 
-You can still override per request with `thinkingEnabled`, `reasoningEffort`, or `extraBody` on `generate()` and `callTool()`.
+The profile rejects Qwen Chat requests that combine thinking with structured
+output, and rejects the reserved function name `search`, before an invalid
+request reaches the API.
+
+#### xAI / Grok
+
+xAI recommends Responses for new work and supports stateful continuation with
+`previousResponseId`.
+
+```php
+$grok = new Openai(
+    client: new OpenaiClient($xaiApiKey, 'https://api.x.ai/v1'),
+    provider: Provider::XAI,
+);
+
+$response = $grok->response(new ResponseRequest(
+    model: 'grok-4.5',
+    input: 'Explain this repository architecture.',
+    store: true,
+));
+
+$continued = $grok->response(new ResponseRequest(
+    model: 'grok-4.5',
+    input: 'Now identify the main risks.',
+    previousResponseId: $response->id,
+));
+```
+
+For any provider, put new or provider-specific top-level fields in
+`ResponseRequest::$extraBody` or the Chat `extraBody` argument. Custom
+authentication headers can be supplied to `OpenaiClient`.
+
+The compatibility profiles follow the providers' current documentation:
+[OpenAI latest models](https://developers.openai.com/api/docs/guides/latest-model),
+[OpenAI Responses migration](https://developers.openai.com/api/docs/guides/migrate-to-responses),
+[DeepSeek models and API coverage](https://api-docs.deepseek.com/quick_start/pricing/),
+[DeepSeek thinking mode](https://api-docs.deepseek.com/guides/thinking_mode/),
+[Qwen Responses compatibility](https://help.aliyun.com/en/model-studio/qwen-api-via-openai-responses),
+and [xAI Responses](https://docs.x.ai/developers/model-capabilities/text/generate-text).
 
 ## Advanced Usage
 
@@ -249,7 +334,7 @@ if ($apiKey === false) {
 }
 
 $client = new OpenaiClient($apiKey);
-$openaiCore = new Openai($client, 'gpt-4.1-mini');
+$openaiCore = new Openai($client, 'gpt-5.6-terra');
 $openaiSimple = new OpenaiSimple($openaiCore);
 
 $system = "You are an assistant that executes tasks by calling tools.";
@@ -308,7 +393,7 @@ if ($apiKey === false) {
 }
 
 $client = new OpenaiClient($apiKey);
-$openai = new Openai($client, 'gpt-4.1-mini');
+$openai = new Openai($client, 'gpt-5.6-terra');
 
 $messages = [
     new UserMessage("Send a low priority notification to user 'jane_doe' saying 'Meeting rescheduled'.")
@@ -441,7 +526,7 @@ if ($apiKey === false) {
 }
 
 $client = new OpenaiClient($apiKey);
-$openaiCore = new Openai($client, 'gpt-4.1-mini');
+$openaiCore = new Openai($client, 'gpt-5.6-terra');
 $openaiSimple = new OpenaiSimple($openaiCore);
 
 // IMPORTANT: You MUST instruct the model to use the specific schema by its name.
@@ -500,7 +585,7 @@ if ($apiKey === false) {
 }
 
 $client = new OpenaiClient($apiKey);
-$openai = new Openai($client, 'gpt-4.1-mini');
+$openai = new Openai($client, 'gpt-5.6-terra');
 
 $messages = [
     new UserMessage('Project deadline discussion is on 2024-09-01 with Charlie.')
@@ -564,7 +649,7 @@ try {
 
 ### Image Input
 
-Provide an array of `ContentPartInterface` objects (`TextContentPart`, `ImageContentPart`) to the `UserMessage` constructor. Requires a vision-capable model like `gpt-4o`.
+Provide an array of `ContentPartInterface` objects (`TextContentPart`, `ImageContentPart`) to the `UserMessage` constructor. This requires a model that accepts image input.
 
 ```php
 <?php
@@ -584,8 +669,8 @@ if ($apiKey === false) {
 }
 
 $client = new OpenaiClient($apiKey);
-// Use a model that supports vision, like gpt-4o or gpt-4.1-mini
-$openai = new Openai($client, 'gpt-4.1-mini');
+// GPT-5.6 accepts text and image input.
+$openai = new Openai($client, 'gpt-5.6-terra');
 
 // Example using a URL
 $imageUrl = 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/dd/Gfp-wisconsin-madison-the-nature-boardwalk.jpg/1280px-Gfp-wisconsin-madison-the-nature-boardwalk.jpg';
@@ -599,7 +684,7 @@ $messages = [
         new TextContentPart(text: "What season does this image depict?"),
         new ImageContentPart(
             url: $imageUrl,
-            detail: ImageDetailLevelEnum::LOW // Optional: LOW, HIGH, or AUTO (default)
+            detail: ImageDetailLevelEnum::ORIGINAL // Optional: LOW, HIGH, AUTO, or ORIGINAL
         )
         // Add more ImageContentPart for multiple images if needed
         // new ImageContentPart(url: $imageBase64Url)
@@ -607,7 +692,7 @@ $messages = [
 ];
 
 try {
-    $response = $openai->completion(messages: $messages, maxTokens: 100);
+    $response = $openai->completion(messages: $messages, maxCompletionTokens: 100);
 
     if ($response instanceof \Shanginn\Openai\ChatCompletion\ErrorResponse) {
          echo "API Error: {$response->message}\n";
@@ -634,6 +719,8 @@ The SDK throws specific exceptions found in the `Shanginn\Openai\Exceptions` nam
 *   `OpenaiNoContentException`: Thrown by `OpenaiSimple` when a choice exists but has no `content`. Access via `$e->response`.
 *   `OpenaiWrongSchemaException`: Thrown by `OpenaiSimple` or potentially during core `Openai` processing if JSON schema/tool calling was requested, but the response didn't conform as expected (e.g., deserialization failed). Access via `$e->response`.
 *   `OpenaiInvalidResponseException`: Base class for response validation issues like `NoChoices`, `NoContent`, `WrongSchema`.
+*   `OpenaiTransportException`: Thrown when cURL cannot complete an HTTP request.
+*   `ProviderCompatibilityException`: Thrown before sending a request containing a known-invalid provider/model parameter combination.
 *   `OpenaiException`: Base exception for all SDK-specific errors.
 
 ```php
@@ -681,7 +768,7 @@ try {
 
 ## Dependencies
 
-*   [amphp/http-client](https://github.com/amphp/http-client): For asynchronous HTTP requests.
+*   [PHP True Async](https://github.com/true-async/php-async): Native coroutines, cancellation, channels, and async-aware cURL.
 *   [crell/serde](https://github.com/crell/serde): For robust serialization and deserialization between PHP objects and JSON.
 *   [symfony/serializer](https://symfony.com/doc/current/components/serializer.html): Used alongside `crell/serde` for normalization, particularly handling enums, snake_case, and custom normalizers.
 *   [spiral/json-schema-generator](https://github.com/spiral/json-schema-generator): **(Recommended)** Used internally and via attributes (`#[Field]`) to generate detailed JSON Schema definitions from PHP classes for Tool Calling and JSON Schema mode.

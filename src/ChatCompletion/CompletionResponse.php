@@ -24,6 +24,7 @@ final class CompletionResponse
      * @param int           $created           The Unix timestamp (in seconds) of when the chat completion was created
      * @param string|null   $serviceTier       The service tier used for processing the request
      * @param string|null   $systemFingerprint The backend configuration fingerprint for determinism
+     * @param array<string, mixed> $raw         Complete provider response for forward compatibility
      */
     public function __construct(
         public string $id,
@@ -35,5 +36,6 @@ final class CompletionResponse
         public int $created,
         public ?string $serviceTier = null,
         public ?string $systemFingerprint = null,
+        public array $raw = [],
     ) {}
 }

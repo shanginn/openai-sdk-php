@@ -106,7 +106,7 @@ if ($apiKey === false) {
 // Ensure you use a model that supports vision and JSON mode!
 $openaiCore = new Openai(
     client: new OpenaiClient($apiKey),
-    model: 'gpt-5-mini'
+    model: 'gpt-5.6-terra'
 );
 $openaiSimple = new OpenaiSimple($openaiCore);
 

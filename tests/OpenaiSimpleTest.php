@@ -16,6 +16,7 @@ use Shanginn\Openai\Exceptions\OpenaiRefusedResponseException;
 use Shanginn\Openai\Exceptions\OpenaiWrongSchemaException;
 use Shanginn\Openai\Exceptions\OpenaiNoChoicesException;
 use Shanginn\Openai\Exceptions\OpenaiNoContentException;
+use Shanginn\Openai\Provider\Provider;
 
 class OpenaiSimpleTest extends TestCase
 {
@@ -83,6 +84,12 @@ class OpenaiSimpleTest extends TestCase
 
     public function testSimpleConfigCanDisableThinkingAndOmitReasoningEffort(): void
     {
+        $this->openaiCore = new Openai(
+            $this->mockClient,
+            'deepseek-v4-pro',
+            Provider::DEEPSEEK,
+        );
+
         $mockApiResponse = json_encode([
             'id' => 'chatcmpl-simple-thinking',
             'object' => 'chat.completion',
@@ -130,6 +137,12 @@ class OpenaiSimpleTest extends TestCase
 
     public function testSimpleConfigCanEnableThinkingWithReasoningEffort(): void
     {
+        $this->openaiCore = new Openai(
+            $this->mockClient,
+            'deepseek-v4-pro',
+            Provider::DEEPSEEK,
+        );
+
         $mockApiResponse = json_encode([
             'id' => 'chatcmpl-simple-thinking-enabled',
             'object' => 'chat.completion',

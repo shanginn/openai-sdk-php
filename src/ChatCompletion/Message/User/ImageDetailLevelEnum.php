@@ -6,8 +6,7 @@ namespace Shanginn\Openai\ChatCompletion\Message\User;
 
 /**
  * Low or high fidelity image understanding
- * By controlling the detail parameter, which has three options,
- * low, high, or auto, you have control over how the model processes the image and generates its
+ * By controlling the detail parameter, you can choose low, high, auto, or original.
  * textual understanding. By default, the model will use the auto setting which will look
  * at the image input size and decide if it should use the low or high setting.
  */
@@ -29,4 +28,5 @@ enum ImageDetailLevelEnum: string
      */
     case HIGH = 'high';
     case AUTO = 'auto';
+    case ORIGINAL = 'original';
 }

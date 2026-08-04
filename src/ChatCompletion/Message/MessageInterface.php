@@ -11,6 +11,7 @@ use Shanginn\Openai\Util\BackedEnumTypeMap;
     Role::USER->value      => UserMessage::class,
     Role::ASSISTANT->value => AssistantMessage::class,
     Role::SYSTEM->value    => SystemMessage::class,
+    Role::DEVELOPER->value => DeveloperMessage::class,
     Role::TOOL->value      => ToolMessage::class,
 ])]
 interface MessageInterface {}
